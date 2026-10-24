@@ -1,4 +1,6 @@
 numpy==1.26.4
+scipy==1.14.1
+pathspec==0.12.1
 scikit-learn==1.5.2
 pandas==2.2.3
 joblib==1.4.2
