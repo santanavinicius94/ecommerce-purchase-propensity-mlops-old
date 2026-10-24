@@ -1,0 +1,35 @@
+name: Validate purchase propensity pipeline
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    name: Validate data contract and training
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install -r requirements.txt
+          python -m pip install -e . --no-deps
+      - name: Run tests
+        run: python -m pytest -q
+      - name: Generate synthetic data for pipeline validation
+        run: python scripts/create_demo_data.py data/raw/sessions.csv
+      - name: Validate DVC pipeline
+        run: |
+          dvc init
+          dvc repro
+      - name: Build training image
+        run: docker build -t ecommerce-purchase-propensity:ci .
+      - name: Run container with synthetic input
+        run: docker run --rm -v "$PWD/data/raw:/app/data/raw:ro" ecommerce-purchase-propensity:ci

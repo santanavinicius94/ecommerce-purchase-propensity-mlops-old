@@ -1,0 +1,23 @@
+stages:
+  prepare:
+    cmd: python -m purchase_propensity.data
+    deps:
+      - data/raw/sessions.csv
+      - src/purchase_propensity/data.py
+      - requirements.txt
+    outs:
+      - data/processed/sessions.csv
+  train:
+    cmd: python -m purchase_propensity.train
+    deps:
+      - data/processed/sessions.csv
+      - src/purchase_propensity/data.py
+      - src/purchase_propensity/train.py
+      - requirements.txt
+    params:
+      - train
+    outs:
+      - models/purchase_propensity.joblib
+    metrics:
+      - reports/metrics.json:
+          cache: false
